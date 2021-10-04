@@ -11,9 +11,11 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 contract SimpleToken is Ownable, ERC721, ERC721Enumerable, ReentrancyGuard {
     using SafeMath for uint256;
 
+    uint256 public maxAirdrop = 100;
     uint256 public maxSupply;
     uint256 public maxTokenAllow = 10;
     uint256 public price = 1000000000000000; 
+    uint256 public totalAirdropped = 0;
 
     string public baseUrl;
     
@@ -24,10 +26,21 @@ contract SimpleToken is Ownable, ERC721, ERC721Enumerable, ReentrancyGuard {
         maxSupply = _maxSupply;
     }
 
+    function airdrop(address[] memory list, uint256 amount) public onlyOwner {
+        require(totalSupply().add(list.length.mul(amount)) <= maxSupply, "Exceed max supply");
+        require(totalAirdropped.add(list.length.mul(amount)) <= maxAirdrop, "Exceed max airdrop");
+
+        for (uint i = 0; i < list.length; i+=1) {
+            _mintToken(list[i], amount);
+        }
+
+        totalAirdropped = totalAirdropped.add(list.length.mul(amount));
+    }
+
     function mintToken(uint256 amount) public payable nonReentrant returns (bool) {
         require(msg.sender == tx.origin , "Address not permitted");
         require(amount <= maxTokenAllow , "Transaction exceed limit");
-        require(msg.value >= amount.mul(price), "Insufficiend fund");
+        require(msg.value >= amount.mul(price), "Insufficient fund");
   
         return _mintToken(_msgSender(), amount);
     }
