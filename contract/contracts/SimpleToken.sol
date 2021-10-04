@@ -60,7 +60,7 @@ contract SimpleToken is Ownable, ERC721, ERC721Enumerable, ReentrancyGuard {
     function tokenURI(uint256 tokenId) public view override (ERC721) returns (string memory) {
         require(tokenId < totalSupply(), "Token not exist.");
         
-        return string(abi.encodePacked(baseUrl, tokenId, ".json"));        
+        return string(abi.encodePacked(baseUrl, Strings.toString(tokenId), ".json"));        
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId

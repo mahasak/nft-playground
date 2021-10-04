@@ -1,8 +1,8 @@
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
- 
- const fs = require('fs')
+ require("@nomiclabs/hardhat-ethers");
+
  const { privateKey, apiKey, coinmarketcapKey} = require('./.secrets.json');
  
  module.exports = {
