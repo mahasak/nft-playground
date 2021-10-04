@@ -1,0 +1,20 @@
+{
+  "name": "nft-playground",
+  "version": "1.0.0",
+  "description": "--- This project designed to build an opensource and ready to use NFT project with solidity/ERC-721 and react frontend.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mahasak/nft-playground.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mahasak/nft-playground/issues"
+  },
+  "homepage": "https://github.com/mahasak/nft-playground#readme"
+}
