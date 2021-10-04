@@ -46,6 +46,8 @@ describe("SimpleToken tests", function () {
 
     it("Minting should fail when insufficient fund", async function () {
         let error = null
+        await token.setStartSaleBlock(1);
+        await ethers.provider.send('evm_mine');
         try {
             await token.mintToken(1, { value: ethers.utils.parseEther("0.0001") })
         }
@@ -60,7 +62,8 @@ describe("SimpleToken tests", function () {
 
     it("Minting should success when NOT exceed limit", async function () {
         const [owner] = await ethers.getSigners();
-
+        await token.setStartSaleBlock(1);
+        await ethers.provider.send('evm_mine');
         let error = null
         try {
             await token.mintToken(2, { value: ethers.utils.parseEther("0.002") })
@@ -90,57 +93,61 @@ describe("SimpleToken tests", function () {
         expect(BigNumber.from(total)._hex).to.equal(BigNumber.from("4")._hex);
     });
 
-    it("Minting should fail when exceed limit", async function () {    
+    it("Minting should fail when exceed limit", async function () {
         const [owner] = await ethers.getSigners();
-        
-    
+
+        await token.setStartSaleBlock(1);
+        await ethers.provider.send('evm_mine');
+
         let error = null
         try {
-          await token.mintToken(10, {value: ethers.utils.parseEther("0.01")})
+            await token.mintToken(10, { value: ethers.utils.parseEther("0.01") })
         }
         catch (err) {
-          error = err
+            error = err
         }
-    
+
         expect(error).not.to.be.an('Error')
         let balance = await token.balanceOf(owner.address);
         expect(BigNumber.from("10")._hex).to.equal(balance._hex);
-    
+
         let total = await token.totalSupply();
         expect(BigNumber.from(total)._hex).to.equal(BigNumber.from("10")._hex);;
-    
+
         try {
-            await token.mintToken(11, {value: ethers.utils.parseEther("0.011")})
+            await token.mintToken(11, { value: ethers.utils.parseEther("0.011") })
         }
         catch (err) {
-          error = err
+            error = err
         }
-    
+
         expect(error).to.be.an('Error')
         expect(error.message).to.equal("VM Exception while processing transaction: reverted with reason string 'Transaction exceed limit'")
-    
+
         balance = await token.balanceOf(owner.address);
         expect(BigNumber.from("10")._hex).to.equal(balance._hex);
-    
+
         total = await token.totalSupply();
         expect(BigNumber.from(total)._hex).to.equal(BigNumber.from("10")._hex);
-      });
+    });
 
-      it("URI should be reveal by block", async function () {    
+    it("URI should be reveal by block", async function () {
         const [owner] = await ethers.getSigners();
-    
+        await token.setStartSaleBlock(1);
+        await ethers.provider.send('evm_mine');
+
         let error = null
         try {
-          await token.mintToken(10, {value: ethers.utils.parseEther("1.0")})
+            await token.mintToken(10, { value: ethers.utils.parseEther("1.0") })
         }
         catch (err) {
-          error = err
+            error = err
         }
-    
+
         expect(error).not.to.be.an('Error')
         let balance = await token.balanceOf(owner.address);
         expect(BigNumber.from("10")._hex).to.equal(balance._hex);
-    
+
         let metadata = await token.tokenURI(1);
         expect(metadata).to.equal("http://someurl.com/default.json");
 
@@ -152,5 +159,47 @@ describe("SimpleToken tests", function () {
 
         metadata = await token.tokenURI(3);
         expect(metadata).to.equal("http://someurl.com/metadata/3.json");
-      });
+    });
+
+    it("Sales should operate by block", async function () {
+        const [owner] = await ethers.getSigners();
+
+        let error = null
+        try {
+            await token.mintToken(10, { value: ethers.utils.parseEther("1.0") })
+        }
+        catch (err) {
+            error = err
+        }
+
+        expect(error).to.be.an('Error')
+        expect(error.message).to.equal("VM Exception while processing transaction: reverted with reason string 'Sale not started'")
+
+        await token.setStartSaleBlock(1);
+        await ethers.provider.send('evm_mine');
+        error = null;
+        try {
+            await token.mintToken(10, { value: ethers.utils.parseEther("1.0") })
+        }
+        catch (err) {
+            error = err
+        }
+
+
+        expect(error).not.to.be.an('Error')
+
+        await token.setEndSaleBlock(2);
+        await ethers.provider.send('evm_mine');
+        error = null;
+        try {
+            await token.mintToken(10, { value: ethers.utils.parseEther("1.0") })
+        }
+        catch (err) {
+            error = err
+        }
+
+        expect(error).to.be.an('Error')
+        expect(error.message).to.equal("VM Exception while processing transaction: reverted with reason string 'Sale ended'")
+
+    });
 });
