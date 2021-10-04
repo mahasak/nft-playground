@@ -10,7 +10,8 @@ describe("SimpleToken tests", function () {
             "Test Token",
             "TST",
             1000,
-            "http://someurl.com/metadata/"
+            "http://someurl.com/metadata/",
+            "http://someurl.com/default.json"
         );
 
         await token.deployed();
@@ -141,9 +142,15 @@ describe("SimpleToken tests", function () {
         expect(BigNumber.from("10")._hex).to.equal(balance._hex);
     
         let metadata = await token.tokenURI(1);
-        expect(metadata).to.equal("http://someurl.com/metadata/1.json");
+        expect(metadata).to.equal("http://someurl.com/default.json");
+
+        await token.setRevealBlock(1);
+        await ethers.provider.send('evm_mine');
 
         metadata = await token.tokenURI(2);
         expect(metadata).to.equal("http://someurl.com/metadata/2.json");
+
+        metadata = await token.tokenURI(3);
+        expect(metadata).to.equal("http://someurl.com/metadata/3.json");
       });
 });

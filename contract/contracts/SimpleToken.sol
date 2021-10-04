@@ -15,14 +15,18 @@ contract SimpleToken is Ownable, ERC721, ERC721Enumerable, ReentrancyGuard {
     uint256 public maxSupply;
     uint256 public maxTokenAllow = 10;
     uint256 public price = 1000000000000000; 
+    uint256 public revealBlock = 0;
     uint256 public totalAirdropped = 0;
 
-    string public baseUrl;
     
-    constructor(string memory _name, string memory _symbol, uint256 _maxSupply, string memory _baseUrl) 
+    string public baseUrl;
+    string public defaultUrl;
+    
+    constructor(string memory _name, string memory _symbol, uint256 _maxSupply, string memory _baseUrl, string memory _defaultUrl) 
         ERC721(_name, _symbol)
     {
         baseUrl = _baseUrl;
+        defaultUrl = _defaultUrl;
         maxSupply = _maxSupply;
     }
 
@@ -57,10 +61,18 @@ contract SimpleToken is Ownable, ERC721, ERC721Enumerable, ReentrancyGuard {
         return true;
     }
 
+    function isRevealed() public view returns (bool) {
+        return revealBlock > 0 && block.number > revealBlock;
+    }
+
+    function setRevealBlock(uint256 blk) public onlyOwner {
+        revealBlock = blk;
+    }
+
     function tokenURI(uint256 tokenId) public view override (ERC721) returns (string memory) {
         require(tokenId < totalSupply(), "Token not exist.");
         
-        return string(abi.encodePacked(baseUrl, Strings.toString(tokenId), ".json"));        
+        return isRevealed() ? string(abi.encodePacked(baseUrl, Strings.toString(tokenId), ".json")) : defaultUrl;    
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId
