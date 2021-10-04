@@ -126,7 +126,7 @@ describe("SimpleToken tests", function () {
         expect(BigNumber.from(total)._hex).to.equal(BigNumber.from("10")._hex);
       });
 
-      it("URI should be valid", async function () {    
+      it("URI should be reveal by block", async function () {    
         const [owner] = await ethers.getSigners();
     
         let error = null
